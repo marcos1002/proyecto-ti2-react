@@ -9,10 +9,11 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableContainer from '@mui/material/TableContainer';
 import IconButton from '@mui/material/IconButton';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DownloadIcon from '@mui/icons-material/Download';
 import usersService from '../services/users.service';
 
-const columns = ['Nombre', 'Apellidos', 'Email', 'INE', 'CURP', 'Comprobante', 'Foto'];
+const columns = ['Nombre', 'Apellidos', 'CURP', 'Email', 'INE', 'CURP pdf', 'Comprobante', 'Foto', 'Acciones'];
 const files = ['ine', 'curp', 'addressProof', 'photo'];
 
 const Register = () => {
@@ -28,10 +29,15 @@ const Register = () => {
     const url = window.URL.createObjectURL(fileData);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `${user.firstName}-${file}.${fileData.type.split('/')[1]}`);	
+    link.setAttribute('download', `${user.firstName}-${file}.${fileData.type.split('/')[1]}`);
     document.body.appendChild(link);
     link.click();
     link.remove();
+  };
+
+  const approveRequest = async (user) => {
+    await usersService.generateCard(user._id);
+    alert('Se ha aprobado la solicitud.\nLa tarjeta ha sido enviada al correo electrónico del usuario.');
   };
 
   useEffect(() => {
@@ -64,6 +70,7 @@ const Register = () => {
               <TableRow key={index}>
                 <TableCell>{user.firstName}</TableCell>
                 <TableCell>{user.lastName}</TableCell>
+                <TableCell>{user.curpText}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 {files.map((file) => (
                   <TableCell key={file} align="center">
@@ -76,6 +83,16 @@ const Register = () => {
                     </IconButton>
                   </TableCell>
                 ))}
+                <TableCell align="center">
+                  <IconButton
+                    onClick={() => approveRequest(user)}
+                    color="primary"
+                    aria-label="approve"
+                    title="Aprobar solicitud"
+                  >
+                    <CheckCircleIcon />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

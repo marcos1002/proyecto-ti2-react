@@ -19,8 +19,13 @@ const findFile = async (id, file) => {
   return data;
 };
 
+const generateCard = async id => {
+  await axios.get(`${url}/users/${id}/card`);
+};
+
 export default {
   find,
   insert,
-  findFile
+  findFile,
+  generateCard
 };

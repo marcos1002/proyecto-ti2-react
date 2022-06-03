@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import Box from '@mui/material/Box';
-import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
@@ -11,21 +10,30 @@ import Typography from '@mui/material/Typography';
 import DirectionsBoatIcon from '@mui/icons-material/DirectionsBoat';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import HourglassFullIcon from '@mui/icons-material/HourglassFull';
-import Container from '@mui/material/Container';
 import IconInfo from './icon-info';
-import CustomAppBar from './custom-app-bar';
 import usersService from '../services/users.service';
 
-const logos = {
-  dif: require('../assets/img/logo-dif.png'),
-  tec: require('../assets/img/logo-tec.png'),
-  inapam: require('../assets/img/logo-inapam.png')
-}
+const validateCurp = (curp) => {
+  const re = /^([A-Z][AEIOUX][A-Z]{2}(\d{2})(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])[HM](?:AS|B[CS]|C[CLMSH]|D[FG]|G[TR]|HG|JC|M[CNS]|N[ETL]|OC|PL|Q[TR]|S[PLR]|T[CSL]|VZ|YN|ZS)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d])(\d)$/;
+  const match = curp.match(re);
+  if (!match) {
+    return false;
+  }
+
+  const year = Number(match[2]);
+  if (year < 20) {
+    return 0;
+  }
+
+  const age = new Date().getFullYear() - 1900 - year;
+  return age;
+};
 
 const Register = () => {
   const [name, setName] = useState('');
   const [lastName1, setLastName1] = useState('');
   const [lastName2, setLastName2] = useState('');
+  const [curpText, setCurpText] = useState('');
   const [email, setEmail] = useState('');
   const [ine, setIne] = useState('');
   const [curp, setCurp] = useState('');
@@ -43,10 +51,20 @@ const Register = () => {
       alert('Debes aceptar los términos y condiciones');
       return;
     }
+    const age = validateCurp(curpText);
+    if (!age) {
+      alert('La CURP no es válida');
+      return;
+    }
+    else if (age < 60) {
+      alert('El trámite es válido solo para mayores de 60 años');
+      return;
+    }
     const data = new FormData();
     data.append('firstName', name);
     data.append('lastName', lastName1 + ' ' + lastName2);
     data.append('email', email);
+    data.append('curpText', curpText);
     data.append('ine', ine);
     data.append('curp', curp);
     data.append('photo', photo);
@@ -94,7 +112,11 @@ const Register = () => {
                 <TextField label="Apellido Materno" variant="standard" size="small"
                   value={lastName2} onChange={(e) => setLastName2(e.target.value)} required />
               </Grid>
-              <Grid item md={12}>
+              <Grid item md={6}>
+                <TextField label="CURP" variant="standard" size="small" fullWidth
+                  value={curpText} onChange={(e) => setCurpText(e.target.value)} required />
+              </Grid>
+              <Grid item md={6}>
                 <TextField label="Correo Electrónico" variant="standard" size="small" fullWidth type="email"
                   value={email} onChange={(e) => setEmail(e.target.value)} required />
               </Grid>
